@@ -16,7 +16,7 @@ def load_data(file_path):
     '''
         argument:
             file_path: ./data/FB15k-237
-        
+
         return:
             entity2id, relation2id, train_triplets, valid_triplets, test_triplets
     '''
@@ -169,7 +169,7 @@ def sort_and_rank(score, target):
 # return MRR (filtered), and Hits @ (1, 3, 10)
 def calc_mrr(embedding, w, test_triplets, all_triplets, hits=[]):
     with torch.no_grad():
-        
+
         num_entity = len(embedding)
 
         ranks_s = []
@@ -193,17 +193,17 @@ def calc_mrr(embedding, w, test_triplets, all_triplets, hits=[]):
             perturb_entity_index = np.array(list(set(np.arange(num_entity)) - set(delete_entity_index)))
             perturb_entity_index = torch.from_numpy(perturb_entity_index)
             perturb_entity_index = torch.cat((perturb_entity_index, object_.view(-1)))
-            
+
             emb_ar = embedding[subject] * w[relation]
             emb_ar = emb_ar.view(-1, 1, 1)
 
             emb_c = embedding[perturb_entity_index]
             emb_c = emb_c.transpose(0, 1).unsqueeze(1)
-            
+
             out_prod = torch.bmm(emb_ar, emb_c)
             score = torch.sum(out_prod, dim = 0)
             score = torch.sigmoid(score)
-            
+
             target = torch.tensor(len(perturb_entity_index) - 1)
             ranks_s.append(sort_and_rank(score, target))
 
@@ -246,5 +246,5 @@ def calc_mrr(embedding, w, test_triplets, all_triplets, hits=[]):
         for hit in hits:
             avg_count = torch.mean((ranks <= hit).float())
             print("Hits (filtered) @ {}: {:.6f}".format(hit, avg_count.item()))
-            
+
     return mrr.item()

@@ -26,7 +26,7 @@ class RGCN(torch.nn.Module):
         x = F.relu(self.conv1(x, edge_index, edge_type, edge_norm))
         x = F.dropout(x, p = self.dropout_ratio, training = self.training)
         x = self.conv2(x, edge_index, edge_type, edge_norm)
-        
+
         return x
 
     def distmult(self, embedding, triplets):
@@ -34,7 +34,7 @@ class RGCN(torch.nn.Module):
         r = self.relation_embedding[triplets[:,1]]
         o = embedding[triplets[:,2]]
         score = torch.sum(s * r * o, dim=1)
-        
+
         return score
 
     def score_loss(self, embedding, triplets, target):

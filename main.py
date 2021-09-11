@@ -48,7 +48,7 @@ def main(args):
     test_graph = build_test_graph(len(entity2id), len(relation2id), train_triplets)
     valid_triplets = torch.LongTensor(valid_triplets)
     test_triplets = torch.LongTensor(test_triplets)
-    
+
     model = RGCN(len(entity2id), len(relation2id), num_bases=args.n_bases, dropout=args.dropout)
     optimizer = torch.optim.Adam(model.parameters(), lr=0.01)
 
@@ -62,9 +62,9 @@ def main(args):
         model.train()
         optimizer.zero_grad()
 
-        loss = train(train_triplets, model, use_cuda, batch_size=args.graph_batch_size, split_size=args.graph_split_size, 
+        loss = train(train_triplets, model, use_cuda, batch_size=args.graph_batch_size, split_size=args.graph_split_size,
             negative_sample=args.negative_sample, reg_ratio = args.regularization, num_entities=len(entity2id), num_relations=len(relation2id))
-        
+
         loss.backward()
         torch.nn.utils.clip_grad_norm_(model.parameters(), args.grad_norm)
         optimizer.step()
@@ -78,7 +78,7 @@ def main(args):
 
             model.eval()
             valid_mrr = valid(valid_triplets, model, test_graph, all_triplets)
-            
+
             if valid_mrr > best_mrr:
                 best_mrr = valid_mrr
                 torch.save({'state_dict': model.state_dict(), 'epoch': epoch},
@@ -86,7 +86,7 @@ def main(args):
 
             if use_cuda:
                 model.cuda()
-    
+
     if use_cuda:
         model.cpu()
 
@@ -100,18 +100,18 @@ def main(args):
 if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(description='RGCN')
-    
+
     parser.add_argument("--graph-batch-size", type=int, default=30000)
     parser.add_argument("--graph-split-size", type=float, default=0.5)
     parser.add_argument("--negative-sample", type=int, default=1)
     parser.add_argument("--n-epochs", type=int, default=10000)
     parser.add_argument("--evaluate-every", type=int, default=500)
-    
+
     parser.add_argument("--dropout", type=float, default=0.2)
     parser.add_argument("--gpu", type=int, default=-1)
     parser.add_argument("--lr", type=float, default=1e-2)
     parser.add_argument("--n-bases", type=int, default=4)
-    
+
     parser.add_argument("--regularization", type=float, default=1e-2)
     parser.add_argument("--grad-norm", type=float, default=1.0)
 
